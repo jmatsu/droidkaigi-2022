@@ -1,0 +1,30 @@
+// This script has to be applied to the app module.
+
+tasks.whenTaskAdded {
+    // Depends on your projects.
+    def mergedConfigName = 'proguard-merged-config.txt'
+
+    def taskNames = [
+        'Release'
+    ].collect { variant ->
+        "minify${variant}WithR8"
+    }
+
+    if (taskNames.contains(name)) {
+        doLast {
+            def mergedConfigFile = project.file('proguard-merged-config.txt')
+
+            // Remove parts that depend on running machines.
+            def lines = mergedConfigFile.text.split(/\n/).collect { line ->
+                line.replaceAll("\r", "")
+                        .replaceAll(rootDir.path, "<root-dir>")
+                        .replaceAll(gradle.gradleUserHomeDir.path, "<gradle-user-home>")
+                        .replaceAll("/transforms-\\d+/[a-z0-9]+?/", "/<working-path>/")
+            }
+
+            mergedConfigFile.write(lines.join("\n"))
+
+            println("Erased user-specific values from proguard/r8 config")
+        }
+    }
+}
