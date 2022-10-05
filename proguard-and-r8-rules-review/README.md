@@ -1,22 +1,51 @@
-# Visualize final-rules of R8/Proguard
+# 前提
 
-## 1. Modify your proguard configruation
+- ライブラリのバージョンが固定されている
+- Gradle プロジェクトである
 
-Specify the following option to print the final result of the proguard/r8 rules to a file.
+# proguard/r8 のルールの可視化
+
+## 1. proguard/r8 の設定をする
+
+次のオプションで proguard/r8 の最終ルールがファイルに保存されます。場所は app module を root とした相対位置です。
 
 ```txt
 -printconfiguration proguard-merged-config.txt
 ```
 
-## 2. Apply `patch-r8-rules.gradle` to your app module
+## 2. ユーザー実行環境依存の文字列を最終ルールファイルから削除する
 
-This patch will erace user-specific values from the merged proguard/r8 rules.
+`patch-r8-rules.gradle` または相当の処理を app module に適用してください。
 
-## 3. Check the diff of the merged rules file
+## 3. コードレビューの対象にする
 
-If your app's proguard/r8 rules have been changed, the merged rules file will be dirty.
+もしどこかの依存ライブラリでルールの変更があった場合、差分として表示されます。またローカルで minification を実行していないと意味がないため、CI サービスでは差分がコミットされていない場合に落とす必要があります。
 
-# Use the specific version of R8
+> 同時に、.gitattributes などで generated になっていないことを確認してください。
+
+
+# R8 の breaking changes / bug をキャッチできるようにする
+
+## 1. proguard/r8 の設定をする
+
+次のオプションで proguard/r8 の結果に関するファイルが保存されます。
+
+```txt
+-printseeds <file path>
+-printusage <file path>
+```
+
+> VCS で管理する必要はありません。
+
+## 2. バージョンの定義ファイルの変更などを見ることで AGP の更新をフックする
+
+そのときに minification を行い、printseeds/printusage で指定したファイルに変化があれば breaking changes/bug と判断してよいです。
+
+> 同時にコードを変更するとレビューが複雑になるため、独立したPRとして作成することをオススメします。
+
+## 3. 特定バージョンの R8 を使って、修正・回避策を考える
+
+実例: Kotlin と R8 の相性問題 - https://github.com/jmatsu/using-moshi-for-bugs-of-r8-with-kotlin-1.6.0
 
 ```gradle
 // Groovy
@@ -28,7 +57,7 @@ buildscript {
     }
 
     dependencies {
-        // Must be before AGP
+        // AGP より先に適用してください
         classpath "com.android.tools:r8:$r8Version"
         classpath "com.android.tools.build:gradle:$agpVersion"
     }
