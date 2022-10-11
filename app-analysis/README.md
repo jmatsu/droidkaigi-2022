@@ -30,7 +30,8 @@ AAB は zip ファイルなので、unzip で閲覧できます。
 
 ## Google 謹製
 
-- [bundletool-cheatsheet.md](./bundletool-cheatsheet.md)
+- https://github.com/google/bundletool
+  - ref: [bundletool-readme.md](./bundletool-readme.md)
 
 ## 3rd party tools
 
