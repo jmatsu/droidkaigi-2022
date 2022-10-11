@@ -1,4 +1,8 @@
+# get-metrics.rb
 
+[bundletool-readme.md](./bundletool-readme.md) で紹介しているコマンド群を集めた Ruby スクリプトです。
+
+これらの値を new version と最新リリースとで比較してください。
 
 ```bash
 export BUNDLETOOL_JAR_PATH=/path/to/bundletool.jar
